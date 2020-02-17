@@ -38,6 +38,9 @@ These listeners are, however, activated any time a tab is opened, updated, or cl
 
 **Now for the sketchy part**: since the page isn't immediately loaded on a create or update event, I've set a timer to update after 1 second in the case of an update event and 5 seconds in the case of a new tab created with the Spoke URL as a workaround. If there is a better way to do this callback (like hook DOMNodeInserted or something), please let me know!
 
+There's also this spoke_tab variable that I've set to check if Spoke is an active tab to get ready for such a hook, but currently I have no use for it.
+
 ## Future Work
 - Maybe a popup that breaks down the number of replies/initials for each campaign so you dont have to keep scrolling
+- Other suggestions include directly taking you to the tab when you click the icon
 - Publish this thing to the Chrome Web Store

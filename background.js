@@ -110,7 +110,7 @@ function inspect_spoke(tabId, changeInfo, tabInfo) {
 				doStuffWithDom(result);
 		    });
 		} 
-	}, 1000);
+	}, 1500);
 }
 
 function inspect_created(tab) {
