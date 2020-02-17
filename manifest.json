@@ -4,7 +4,9 @@
     "version": "0.1",
     "permissions": [
         "*://text.berniesanders.com/app/1/todos/",
-        "tabs"
+        "tabs",
+        "windows",
+        "activeTab"
     ],
     "background": {
         "scripts": ["background.js"],
@@ -13,10 +15,17 @@
     "browser_action": {
         "default_title": "Inspect Spoke"
     },
+    "content_scripts": [
+        {
+            "matches": ["*://text.berniesanders.com/app/1/todos/"],
+            "run_at": "document_idle",
+            "js": ["contentScript.js"]
+        }
+    ],
     "icons": {
-    "16": "images/icons8-typing-16.png",
-    "48": "images/icons8-typing-48.png",
-    "128": "images/icons8-typing-100.png"
-  },
+        "16": "images/icons8-typing-16.png",
+        "48": "images/icons8-typing-48.png",
+        "128": "images/icons8-typing-100.png"
+    },
     "manifest_version": 2
 }

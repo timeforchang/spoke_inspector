@@ -36,11 +36,12 @@ These listeners will execute extra code only when they receive an event related 
 
 These listeners are, however, activated any time a tab is opened, updated, or closed, which might lead to some overhead. This overhead is only an if statement check.
 
-**Now for the sketchy part**: since the page isn't immediately loaded on a create or update event, I've set a timer to update after 1 second in the case of an update event and 5 seconds in the case of a new tab created with the Spoke URL as a workaround. If there is a better way to do this callback (like hook DOMNodeInserted or something), please let me know!
+**Now for the sketchy part**: since the page isn't immediately loaded on a create or update event, I've set a timer to update after 1.5 seconds in the case of an update event and 5 seconds in the case of a new tab created with the Spoke URL as a workaround. If there is a better way to do this callback (like hook DOMNodeInserted or something), please let me know!
 
 There's also this spoke_tab variable that I've set to check if Spoke is an active tab to get ready for such a hook, but currently I have no use for it.
 
 ## Future Work
+- Needs to actually start inject some content script I guess
 - Maybe a popup that breaks down the number of replies/initials for each campaign so you dont have to keep scrolling
-- Other suggestions include directly taking you to the tab when you click the icon
+- ~~Other suggestions include directly taking you to the tab when you click the icon~~ Done - as long as you are in the same desktop
 - Publish this thing to the Chrome Web Store

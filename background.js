@@ -73,6 +73,12 @@ function doStuffWithDom(domContent) {
     }
 }
 
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+    if (request.content)
+      	doStuffWithDom(request.content);
+});
+
 var spoke_tab = null;
 
 function check_tabs() {
@@ -83,10 +89,7 @@ function check_tabs() {
 				// collect all of the urls here, I will just log them instead
 				if (urlRegex.test(tab.url)) {
 					spoke_tab = tab;
-					chrome.tabs.executeScript(tab.id, {code: 'document.all[0].outerHTML'}, function(response) {
-				        var result = response[0];
-						doStuffWithDom(result);
-				    });
+					chrome.tabs.executeScript(tab.id, {file: 'contentScript.js'});
 				    found = true;
 				} 
 			});
@@ -99,39 +102,45 @@ function check_tabs() {
 	});
 }
 
-function inspect_spoke(tabId, changeInfo, tabInfo) {
-	setTimeout(function() {
-		// collect all of the urls here, I will just log them instead
-		if (!spoke_tab || !spoke_tab.active) {
-			check_tabs();
-		} else if (urlRegex.test(tabInfo.url)) {
-			chrome.tabs.executeScript(tabId, {code: 'document.all[0].outerHTML'}, function(response) {
-		        var result = response[0];
-				doStuffWithDom(result);
-		    });
-		} 
-	}, 1500);
+function inspect_spoke(tabId, changeInfo, tab) {
+	// collect all of the urls here, I will just log them instead
+	if (!spoke_tab) {
+		check_tabs();
+	} else if (urlRegex.test(tab.url)) {
+		spoke_tab = tab;
+		chrome.tabs.executeScript(tabId, {file: 'contentScript.js'});
+	} 
 }
 
 function inspect_created(tab) {
-	setTimeout(function() {
-		// collect all of the urls here, I will just log them instead
-		if (urlRegex.test(tab.url)) {
-			spoke_tab = tab;
-			chrome.tabs.executeScript(tabId, {code: 'document.all[0].outerHTML'}, function(response) {
-		        var result = response[0];
-				doStuffWithDom(result);
-		    });
-		} 
-	}, 5000);
+	// collect all of the urls here, I will just log them instead
+	if (urlRegex.test(tab.url)) {
+		console.log("Spoke created");
+		spoke_tab = tab;
+		chrome.tabs.executeScript(tab.id, {file: 'contentScript.js'});
+	} 
 }
 
 function inspect_removed(tab) {
 	// collect all of the urls here, I will just log them instead
 	if (urlRegex.test(tab.url)) {
 		spoke_tab = null;
+		console.log("Spoke removed");
 		chrome.browserAction.setIcon({path: "images/icons8-typing-16-grey.png"});
 		chrome.browserAction.setBadgeText({text: ''});
+	}
+}
+
+function handle_click() {
+	if (spoke_tab) {
+		console.log("tab valid")
+		chrome.tabs.get(spoke_tab.id, function(tab) {
+			chrome.windows.update(spoke_tab.windowId, {focused: true});
+			chrome.tabs.update(spoke_tab.id, {selected: true});
+		});
+	} else {
+		var newURL = "https://text.berniesanders.com/app/1/todos";
+  		chrome.tabs.create({ url: newURL });
 	}
 }
 
@@ -139,3 +148,5 @@ chrome.tabs.onCreated.addListener(inspect_created);
 chrome.tabs.onUpdated.addListener(inspect_spoke);
 chrome.tabs.onRemoved.addListener(inspect_removed);
 chrome.runtime.onInstalled.addListener(check_tabs);
+
+chrome.browserAction.onClicked.addListener(handle_click);
