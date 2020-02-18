@@ -73,13 +73,13 @@ function doStuffWithDom(domContent) {
     }
 }
 
+chrome.storage.local.set({'spoke_tab': "default"});
+
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {
     if (request.content)
       	doStuffWithDom(request.content);
 });
-
-var spoke_tab = null;
 
 function check_tabs() {
 	chrome.windows.getAll({populate:true}, function(windows) {
@@ -88,7 +88,7 @@ function check_tabs() {
 			window.tabs.forEach(function(tab) {
 				// collect all of the urls here, I will just log them instead
 				if (urlRegex.test(tab.url)) {
-					spoke_tab = tab;
+					chrome.storage.local.set({'spoke_tab': tab});
 					chrome.tabs.executeScript(tab.id, {file: 'contentScript.js'});
 				    found = true;
 				} 
@@ -104,10 +104,8 @@ function check_tabs() {
 
 function inspect_spoke(tabId, changeInfo, tab) {
 	// collect all of the urls here, I will just log them instead
-	if (!spoke_tab) {
-		check_tabs();
-	} else if (urlRegex.test(tab.url)) {
-		spoke_tab = tab;
+	if (urlRegex.test(tab.url)) {
+		chrome.storage.local.set({'spoke_tab': tab});
 		chrome.tabs.executeScript(tabId, {file: 'contentScript.js'});
 	} 
 }
@@ -116,7 +114,7 @@ function inspect_created(tab) {
 	// collect all of the urls here, I will just log them instead
 	if (urlRegex.test(tab.url)) {
 		console.log("Spoke created");
-		spoke_tab = tab;
+		chrome.storage.local.set({'spoke_tab': tab});
 		chrome.tabs.executeScript(tab.id, {file: 'contentScript.js'});
 	} 
 }
@@ -132,16 +130,18 @@ function inspect_removed(tab) {
 }
 
 function handle_click() {
-	if (spoke_tab) {
-		console.log("tab valid")
-		chrome.tabs.get(spoke_tab.id, function(tab) {
-			chrome.windows.update(spoke_tab.windowId, {focused: true});
-			chrome.tabs.update(spoke_tab.id, {selected: true});
-		});
-	} else {
-		var newURL = "https://text.berniesanders.com/app/1/todos";
-  		chrome.tabs.create({ url: newURL });
-	}
+	chrome.storage.local.get({'spoke_tab': "default"}, function(data) {
+	  	if (data.spoke_tab != "default") {
+			console.log("tab valid")
+			chrome.tabs.get(data.id, function(tab) {
+				chrome.windows.update(data.windowId, {focused: true});
+				chrome.tabs.update(data.id, {selected: true});
+			});
+		} else {
+			var newURL = "https://text.berniesanders.com/app/1/todos";
+	  		chrome.tabs.create({ url: newURL });
+		}
+	});
 }
 
 chrome.tabs.onCreated.addListener(inspect_created);

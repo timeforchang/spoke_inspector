@@ -1,4 +1,4 @@
-# Spoke Inspector
+# Spoke Monitor
 Here is the source code for a little Chrome extension that can help you track your texts in Spoke. If you want to make changes to the code, feel free to fork the repo!
 
 ## Installation
@@ -10,7 +10,7 @@ Make sure you have the following installed:
 
 Next, go to your "Extensions" page in Chrome. You can find the page by following the Google Chrome docs found here: https://support.google.com/chrome_webstore/answer/2664769?hl=en#/. 
 
-In the "Extensions" page, make sure the "Developer mode" switch in the top right corner is turned **ON**. Next, click the "Load unpacked" button in the top left. This will launch a prompt for you to select the folder with all of the source code. Select the folder in the prompt, and you are ready to go! You will see the extension icon in the top right hand side of your Chrome window. Keep in mind that this extension operates on the assumption that the dashboard page for Spoke is `text.berniesanders.com/app/1/todos`. 
+In the "Extensions" page, make sure the "Developer mode" switch in the top right corner is turned **ON**. Next, click the "Load unpacked" button in the top left. This will launch a prompt for you to select the folder with all of the source code. Select the folder in the prompt, and you are ready to go! You will see the extension icon in the top right hand side of your Chrome window. Keep in mind that this extension operates on the assumption that the dashboard page for Spoke is ```text.berniesanders.com/app/1/todos```. 
 
 <div style="text-align:center;"><img src="screenshot.jpg" /></div>
 
@@ -32,16 +32,12 @@ This section is for you to read about how inefficient the code might be. However
 
 The script sets a listener for every tab that is created, updated, and removed. There is also a listener attached for when the extension is first installed. 
 
-These listeners will execute extra code only when they receive an event related to the a tab that has Spoke opened (specifically, with the URL: http(s)://text.berniesanders.com/app/1/todos). This extra code gets the DOM from the Spoke page, and counts up all of the badges for each assignment you have. 
+These listeners will execute extra code only when they receive an event related to the a tab that has Spoke opened (specifically, with the URL: ```http(s)://text.berniesanders.com/app/1/todos```). This extra code gets the DOM from the Spoke page, and counts up all of the badges for each assignment you have. 
 
-These listeners are, however, activated any time a tab is opened, updated, or closed, which might lead to some overhead. This overhead is only an if statement check.
-
-**Now for the sketchy part**: since the page isn't immediately loaded on a create or update event, I've set a timer to update after 1.5 seconds in the case of an update event and 5 seconds in the case of a new tab created with the Spoke URL as a workaround. If there is a better way to do this callback (like hook DOMNodeInserted or something), please let me know!
-
-There's also this spoke_tab variable that I've set to check if Spoke is an active tab to get ready for such a hook, but currently I have no use for it.
+These listeners are, however, activated any time a tab is opened, updated, or closed, which might lead to some overhead. This overhead is only an if statement check. Now, these listeners will inject a content script that is injected once and will asynchronously send a message to the background script whenever there is a mutation to the DOM.
 
 ## Future Work
-- Needs to actually start inject some content script I guess
+- ~~Needs to actually start inject some content script I guess~~ Done!
 - Maybe a popup that breaks down the number of replies/initials for each campaign so you dont have to keep scrolling
 - ~~Other suggestions include directly taking you to the tab when you click the icon~~ Done - as long as you are in the same desktop
 - Publish this thing to the Chrome Web Store

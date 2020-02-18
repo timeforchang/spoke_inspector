@@ -1,19 +1,20 @@
 {
-    "name": "Spoke Inspector",
+    "name": "Spoke Monitor",
     "description": "Check your unread texts without being in the Spoke tab!",
     "version": "0.1",
     "permissions": [
         "*://text.berniesanders.com/app/1/todos/",
         "tabs",
         "windows",
-        "activeTab"
+        "activeTab",
+        "storage"
     ],
     "background": {
         "scripts": ["background.js"],
         "persistent": false
     },
     "browser_action": {
-        "default_title": "Inspect Spoke"
+        "default_title": "Go to Spoke"
     },
     "content_scripts": [
         {
