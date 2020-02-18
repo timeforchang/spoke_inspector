@@ -28,10 +28,10 @@ padding: 4px 2px 0px; text-align: center; vertical-align: middle; \
 function doStuffWithDom(domContent) {
     // console.log('I received the following DOM content:\n' + domContent);
     if (domContent.indexOf('Request More Texts') !== -1) {
-    	console.log("texts are available");
+    	// console.log("texts are available");
     	chrome.browserAction.setIcon({path: "images/icons8-typing-16.png"});
     } else {
-    	console.log("texts are not available");
+    	// console.log("texts are not available");
     	chrome.browserAction.setIcon({path: "images/icons8-typing-16-grey.png"});
     }
 
@@ -41,7 +41,7 @@ function doStuffWithDom(domContent) {
     past_skipped.forEach(function(badge) {
     	past_total += parseInt(badge.split("<")[0]);
     });
-    console.log("total past/skipped: " + past_total);
+    // console.log("total past/skipped: " + past_total);
 
     var initials = domContent.split(initials_form);
     initials.shift();
@@ -49,7 +49,7 @@ function doStuffWithDom(domContent) {
     initials.forEach(function(badge) {
     	initials_total += parseInt(badge.split("<")[0]);
     });
-    console.log("total initials: " + initials_total);
+    // console.log("total initials: " + initials_total);
 
     var replies = domContent.split(replies_form);
     replies.shift();
@@ -57,11 +57,11 @@ function doStuffWithDom(domContent) {
     replies.forEach(function(badge) {
     	replies_total += parseInt(badge.split("<")[0]);
     });
-    console.log("total replies: " + replies_total);
+    // console.log("total replies: " + replies_total);
 
     if (replies_total == 0 && initials_total == 0 && past_total > 0) {
     	chrome.browserAction.setBadgeBackgroundColor({color: "#ffd700"});
-    	chrome.browserAction.setBadgeText({text: past_total.toString()});
+    	chrome.browserAction.setBadgeText({text: " "});
     } else if (replies_total == 0 && initials_total > 0) {
     	chrome.browserAction.setBadgeBackgroundColor({color: "#53b477"});
     	chrome.browserAction.setBadgeText({text: initials_total.toString()});
@@ -84,18 +84,18 @@ chrome.runtime.onMessage.addListener(
 function check_tabs() {
 	chrome.windows.getAll({populate:true}, function(windows) {
 		var found = false;
-		windows.forEach(function(window) {
-			window.tabs.forEach(function(tab) {
+		windows.some(function(window) {
+			window.tabs.some(function(tab) {
 				// collect all of the urls here, I will just log them instead
 				if (urlRegex.test(tab.url)) {
-					chrome.storage.local.set({'spoke_tab': tab});
 					chrome.tabs.executeScript(tab.id, {file: 'contentScript.js'});
 				    found = true;
+				    return found;
 				} 
 			});
 		});
 		if (!found) {
-			console.log("texts are not available");
+			console.log("Spoke is not available");
 			chrome.browserAction.setIcon({path: "images/icons8-typing-16-grey.png"});
 			chrome.browserAction.setBadgeText({text: ''});
 		}
@@ -105,7 +105,6 @@ function check_tabs() {
 function inspect_spoke(tabId, changeInfo, tab) {
 	// collect all of the urls here, I will just log them instead
 	if (urlRegex.test(tab.url)) {
-		chrome.storage.local.set({'spoke_tab': tab});
 		chrome.tabs.executeScript(tabId, {file: 'contentScript.js'});
 	} 
 }
@@ -113,34 +112,48 @@ function inspect_spoke(tabId, changeInfo, tab) {
 function inspect_created(tab) {
 	// collect all of the urls here, I will just log them instead
 	if (urlRegex.test(tab.url)) {
-		console.log("Spoke created");
-		chrome.storage.local.set({'spoke_tab': tab});
+		// console.log("Spoke created");
 		chrome.tabs.executeScript(tab.id, {file: 'contentScript.js'});
 	} 
 }
 
 function inspect_removed(tabId, removeInfo) {
 	// collect all of the urls here, I will just log them instead
-	chrome.storage.local.get({'spoke_tab': "default"}, function(data) {
-	  	if (data.spoke_tab != "default" && data.spoke_tab.id == tabId) {
-			console.log("tab valid")
-			chrome.storage.local.set({'spoke_tab': "default"});
-			console.log("Spoke removed");
+	chrome.windows.getAll({populate:true}, function(windows) {
+		var found = false;
+		windows.some(function(window) {
+			window.tabs.some(function(tab) {
+				// collect all of the urls here, I will just log them instead
+				if (urlRegex.test(tab.url)) {
+					chrome.tabs.executeScript(tab.id, {file: 'contentScript.js'});
+				    found = true;
+				    return found;
+				} 
+			});
+		});
+		if (!found) {
+			console.log("Spoke is not available");
 			chrome.browserAction.setIcon({path: "images/icons8-typing-16-grey.png"});
 			chrome.browserAction.setBadgeText({text: ''});
-		} 
+		}
 	});
 }
 
 function handle_click() {
-	chrome.storage.local.get({'spoke_tab': "default"}, function(data) {
-	  	if (data.spoke_tab != "default") {
-			console.log("tab valid")
-			chrome.tabs.get(data.spoke_tab.id, function(tab) {
-				chrome.windows.update(data.spoke_tab.windowId, {focused: true});
-				chrome.tabs.update(data.spoke_tab.id, {selected: true});
+	chrome.windows.getAll({populate:true}, function(windows) {
+		var found = false;
+		windows.some(function(window) {
+			window.tabs.some(function(tab) {
+				// collect all of the urls here, I will just log them instead
+				if (urlRegex.test(tab.url)) {
+					chrome.windows.update(tab.windowId, {focused: true});
+					chrome.tabs.update(tab.id, {selected: true});
+				    found = true;
+				    return found;
+				} 
 			});
-		} else {
+		});
+		if (!found) {
 			var newURL = "https://text.berniesanders.com/app/1/todos";
 	  		chrome.tabs.create({ url: newURL });
 		}
