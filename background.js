@@ -119,23 +119,26 @@ function inspect_created(tab) {
 	} 
 }
 
-function inspect_removed(tab) {
+function inspect_removed(tabId, removeInfo) {
 	// collect all of the urls here, I will just log them instead
-	if (urlRegex.test(tab.url)) {
-		spoke_tab = null;
-		console.log("Spoke removed");
-		chrome.browserAction.setIcon({path: "images/icons8-typing-16-grey.png"});
-		chrome.browserAction.setBadgeText({text: ''});
-	}
+	chrome.storage.local.get({'spoke_tab': "default"}, function(data) {
+	  	if (data.spoke_tab != "default" && data.spoke_tab.id == tabId) {
+			console.log("tab valid")
+			chrome.storage.local.set({'spoke_tab': "default"});
+			console.log("Spoke removed");
+			chrome.browserAction.setIcon({path: "images/icons8-typing-16-grey.png"});
+			chrome.browserAction.setBadgeText({text: ''});
+		} 
+	});
 }
 
 function handle_click() {
 	chrome.storage.local.get({'spoke_tab': "default"}, function(data) {
 	  	if (data.spoke_tab != "default") {
 			console.log("tab valid")
-			chrome.tabs.get(data.id, function(tab) {
-				chrome.windows.update(data.windowId, {focused: true});
-				chrome.tabs.update(data.id, {selected: true});
+			chrome.tabs.get(data.spoke_tab.id, function(tab) {
+				chrome.windows.update(data.spoke_tab.windowId, {focused: true});
+				chrome.tabs.update(data.spoke_tab.id, {selected: true});
 			});
 		} else {
 			var newURL = "https://text.berniesanders.com/app/1/todos";
