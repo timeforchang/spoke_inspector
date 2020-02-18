@@ -14,6 +14,8 @@ In the "Extensions" page, make sure the "Developer mode" switch in the top right
 
 <div style="text-align:center;"><img src="screenshot.jpg" /></div>
 
+**NOTE: THIS EXTENSION WILL ONLY BE AS FAST AS THE REACT APP UPDATES ITSELF. IF YOU WANT QUICKER UPDATES, INSTALL AN EXTENSION FOR AUTO-REFRESH**
+
 ## Usage
 This is a simple extension that will tell you the status of your Spoke page without you being physically on the page. It checks the HTML source of the Spoke page and counts the number of past/skipped, initial, and to be replied to messages in Spoke. The extension updates the count every time the Chrome tab with Spoke is updated or created. 
 
